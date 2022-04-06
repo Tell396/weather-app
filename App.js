@@ -7,10 +7,14 @@ import { VStack, Box, Divider, Button, Spacer, Input, Heading, Center } from 'na
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 
+import countries from 'i18n-iso-countries';
+
+countries.registerLocale(require('i18n-iso-countries/langs/en.json'));
+
 export default function App() {
-  const [value, setValue] = useState('');
+  /* const [value, setValue] = useState('');
   const [temp, setTemp] = useState('');
-  const [typecity, setTypeCity] = useState('');
+  const [typecity, setTypeCity] = useState('Vladivostok');
   const [city, setCity] = useState('Vladivostok');
   const [img, setimg] = useState('');
   const [disc, setdisc] = useState('');
@@ -18,104 +22,134 @@ export default function App() {
   const citySelect = (e) => {
     e.preventDefault();
     setCity(typecity);
-  };
+  }; 
 
   useEffect(() => {
     axios(
       `http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=0fc50e5fe3acdddbea0f8fd6d9795f8b&units=metric`,
     )
-      .then((resolve) => {
-        console.log(resolve.data);
-        setValue(resolve.data);
-        setTemp(resolve.data.main);
-        setimg(`http://openweathermap.org/img/wn/${resolve.data.weather[0].icon}.png`);
-        setdisc(resolve.data.weather[0].description);
+      .then((res) => {
+        console.log(res.data);
+        setValue(res.data);
+        setTemp(res.data.main);
+        setimg(`http://openweathermap.org/img/wn/${res.data.weather[0].icon}.png`);
+        setdisc(res.data.weather[0].description);
       })
       .catch((reject) => {
         console.log(reject);
         setValue('City not found');
       });
-  }, [city]);
+  }, [city]); */
+
+
+  const [apiData, setApiData] = useState({});
+  const [getState, setGetState] = useState('tamilnadu');
+  const [state, setState] = useState('tamilnadu');
+
+  // API KEY AND URL
+  const apiUrl = `http://api.openweathermap.org/data/2.5/weather?q=${state}&appid=0fc50e5fe3acdddbea0f8fd6d9795f8b&units=metric`;
+
+  // Side effect
+  useEffect(() => {
+    fetch(apiUrl)
+      .then((res) => res.json())
+      .then((data) => setApiData(data));
+  }, [apiUrl]);
+
+  const inputHandler = (event) => {
+    setGetState(event.target.value);
+  };
+
+  const submitHandler = () => {
+    setState(getState);
+  };
+
+  const kelvinToFarenheit = (k) => {
+    return (k - 273.15).toFixed(2);
+  };
 
   return (
-    <View style={styles.container}>
-      <StatusBar style="auto" />
-
-      {/* {console.log(city)}
-      <Paper className="paper">
-        <form onSubmit={citySelect}>
-          <TextField
-            className="elementcenter"
-            placeholder="Enter city name"
-            value={typecity}
-            onChange={(e) => setTypeCity(e.target.value)}
-          />
-          <Button type="submit" name="btn">
-            <SendIcon style={{ outline: "none" }} />
-          </Button>
-        </form>
-        <br />
-        <h6 className="fontcss">{value.name}</h6>
-
-        <img src={img} alt="weather icon" className="imgcss" />
-        <h6 className="fontcss">{disc}</h6>
-
-        <div className="elementcenter">
-          <p>
-            Min
-            <br />
-            {`${Math.floor(temp.temp_min - 273.15)}° C`}
-          </p>
-          <h6 className="fontcss">{`${Math.floor(temp.temp - 273.15)}° C`}</h6>
-          <p>
-            Max
-            <br />
-            {`${Math.floor(temp.temp_max - 273.15)}° C`}
-          </p>
-        </div>
-      </Paper> */}
-
+    <View /* style={styles.container} */>
       <NativeBaseProvider>
-        <Center pt={5}>
-          {/* <form onSubmit={citySelect}>
-            <Button type="submit" name="btn">
-              <SendIcon style={{ outline: "none" }} />
-            </Button>
-          </form> */}
+        <StatusBar style="auto" />
+        <Center >
+          <Heading m={5}>React Weather App</Heading>
+          <div >
+            <div>
+              <Input
+                type="text"
+                placeholder="Enter Location"
+                onChange={inputHandler}
+                value={getState}
+              />
+              <Button>Search</Button>
+            </div>
 
-          <form onSubmit={citySelect}>
-            <Input
-              className="elementcenter"
-              placeholder="Enter city name"
-              value={typecity}
-              onChange={(e) => setTypeCity(e.target.value)}
-            />
-            <Button type="submit" name="btn">Select</Button>
+            <div style={{ width: '60vw' }}>
+              {apiData.main ? (
+                <Center >
+                  <img
+                    src={`http://openweathermap.org/img/w/${apiData.weather[0].icon}.png`}
+                    alt="weather status icon"
+                    width="60px"
+                  />
 
-            {console.log(citySelect)}
-          </form>
+                  <p className="h2">
+                    {kelvinToFarenheit(apiData.main.temp)}&deg; C
+                  </p>
 
+                  <p className="h5">
+                    <i className="fas fa-map-marker-alt"></i>{' '}
+                    <strong>{apiData.name}</strong>
+                  </p>
 
-          <Divider m={5} />
-
-          <Heading>{city} - {temp.temp}°C</Heading>
+                  <div>
+                    <div >
+                      <p>
+                        <i ></i>{' '}
+                        <strong>
+                          {kelvinToFarenheit(apiData.main.temp_min)}&deg; C
+                        </strong>
+                      </p>
+                      <p>
+                        <i ></i>{' '}
+                        <strong>
+                          {kelvinToFarenheit(apiData.main.temp_max)}&deg; C
+                        </strong>
+                      </p>
+                    </div>
+                    <div>
+                      <p>
+                        {' '}
+                        <strong>{apiData.weather[0].main}</strong>
+                      </p>
+                      <p>
+                        <strong>
+                          {' '}
+                          {countries.getName(apiData.sys.country, 'en', {
+                            select: 'official',
+                          })}
+                        </strong>
+                      </p>
+                    </div>
+                  </div>
+                </Center>
+              ) : (
+                <h1>Loading</h1>
+              )}
+            </div>
+          </div>
         </Center>
-
-        <Box border="1" borderRadius="md" m={25}>
-          <VStack space="4" divider={<Divider />}>
-            <Box px="4" p="4" background="#dce8eb" rounded={5}>{disc}</Box>
-          </VStack>
-        </Box>
       </NativeBaseProvider>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+/* const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
   },
-});
+}); */

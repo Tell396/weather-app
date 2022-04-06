@@ -1,4 +1,5 @@
 {
+  "name": "weatherApp",
   "expo": {
     "name": "weatherApp",
     "slug": "weatherApp",
@@ -7,5 +8,7 @@
       "**/*"
     ]
   },
-  "name": "weatherApp"
+  "android": {
+    "versionCode": 1
+  }
 }
